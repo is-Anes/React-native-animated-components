@@ -30,46 +30,41 @@ interface MagnetProps {
 // Constants
 const { width, height } = Dimensions.get('window');
 
-const DEFAULT_MAGNETS: Position[] = [
-  // Curved path positions with varied spacing
-  {
-    x: width * 0.2,
-    y: height * 0.3,
-  },
-  {
-    x: width * 0.35,
-    y: height * 0.15,
-  },
-  {
-    x: width * 0.55,
-    y: height * 0.2,
-  },
-  {
-    x: width * 0.8,
-    y: height * 0.3,
-  },
-  {
-    x: width * 0.85,
-    y: height * 0.55,
-  },
-  {
-    x: width * 0.7,
-    y: height * 0.75,
-  },
-  {
-    x: width * 0.4,
-    y: height * 0.8,
-  },
-  {
-    x: width * 0.15,
-    y: height * 0.6,
-  },
-  // Central focus point
-  {
-    x: width * 0.5,
-    y: height * 0.5,
-  },
-];
+// Create a Fibonacci spiral pattern
+const createFibonacciPositions = (count: number): Position[] => {
+  const positions: Position[] = [];
+  const centerX = width * 0.5;
+  const centerY = height * 0.5;
+  const scaleFactor = Math.min(width, height) * 0.0035;
+
+  // Golden ratio constant
+  const goldenRatio = 1.618033988749895;
+
+  for (let i = 0; i < count; i++) {
+    // Calculate the angle using the golden ratio
+    const theta = i * goldenRatio * Math.PI * 2;
+
+    // Calculate the radius using a Fibonacci-like growth
+    const radius = scaleFactor * Math.sqrt(i);
+
+    // Convert polar coordinates to Cartesian coordinates
+    const x = centerX + radius * Math.cos(theta) * 100;
+    const y = centerY + radius * Math.sin(theta) * 100;
+
+    // Ensure points stay within screen bounds
+    const boundedX = Math.max(50, Math.min(width - 50, x));
+    const boundedY = Math.max(50, Math.min(height - 50, y));
+
+    positions.push({ x: boundedX, y: boundedY });
+  }
+
+  // Add a central point
+  positions.push({ x: centerX, y: centerY });
+
+  return positions;
+};
+
+const DEFAULT_MAGNETS: Position[] = createFibonacciPositions(8);
 
 const MAGNET_RADIUS = 10;
 // const MAGNET_COLOR = '#c8c8c8'; // Darker metallic gray
