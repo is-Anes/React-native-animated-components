@@ -28,14 +28,46 @@ interface MagnetProps {
 // Constants
 const { width, height } = Dimensions.get('window');
 
-const FIRST_MAGNET_CENTER: Position = {
-  x: width / 3,
-  y: height / 2 - height / 4,
-};
-const SECOND_MAGNET_CENTER: Position = {
-  x: width / 2,
-  y: height / 2 + height / 4,
-};
+const DEFAULT_MAGNETS: Position[] = [
+  // Curved path positions with varied spacing
+  {
+    x: width * 0.2,
+    y: height * 0.3,
+  },
+  {
+    x: width * 0.35,
+    y: height * 0.15,
+  },
+  {
+    x: width * 0.55,
+    y: height * 0.2,
+  },
+  {
+    x: width * 0.8,
+    y: height * 0.3,
+  },
+  {
+    x: width * 0.85,
+    y: height * 0.55,
+  },
+  {
+    x: width * 0.7,
+    y: height * 0.75,
+  },
+  {
+    x: width * 0.4,
+    y: height * 0.8,
+  },
+  {
+    x: width * 0.15,
+    y: height * 0.6,
+  },
+  // Central focus point
+  {
+    x: width * 0.5,
+    y: height * 0.5,
+  },
+];
 
 const MAGNET_RADIUS = 10;
 const MAGNET_COLOR = '#b8b8b8';
@@ -54,6 +86,7 @@ const getDistance = (position: Position, position2: Position) => {
 
 const useMagnetDrag = (
   initialPosition: Position,
+  magnets: Position[],
   { animation }: { animation: 'spring' | 'timing' },
 ) => {
   const positionX = useSharedValue(initialPosition.x);
@@ -66,14 +99,26 @@ const useMagnetDrag = (
     y: positionY.value,
   }));
 
-  const getNearestMagnet = (position: Position): Position => {
+  const getNearestMagnet = (currentPosition: Position): Position => {
     'worklet';
-    const distanceToFirstMagnet = getDistance(position, FIRST_MAGNET_CENTER);
-    const distanceToSecondMagnet = getDistance(position, SECOND_MAGNET_CENTER);
 
-    return distanceToFirstMagnet < distanceToSecondMagnet
-      ? FIRST_MAGNET_CENTER
-      : SECOND_MAGNET_CENTER;
+    if (magnets.length === 0) {
+      return currentPosition;
+    }
+
+    const [firstMagnet] = magnets;
+    let nearestMagnet = firstMagnet;
+    let shortestDistance = getDistance(currentPosition, firstMagnet);
+
+    for (let i = 1; i < magnets.length; i++) {
+      const distance = getDistance(currentPosition, magnets[i]);
+      if (distance < shortestDistance) {
+        shortestDistance = distance;
+        nearestMagnet = magnets[i];
+      }
+    }
+
+    return nearestMagnet;
   };
 
   const animatedStyle = useAnimatedStyle(() => ({
@@ -151,16 +196,30 @@ const Magnet: React.FC<MagnetProps> = ({
 
 type MagnetsProps = {
   type: 'spring' | 'timing';
+  magnets?: Position[];
+  initialPosition?: Position;
+  magnetRadius?: number;
+  magnetColor?: string;
+  objectRadius?: number;
+  objectColor?: string;
 };
 
-export const Magnets: React.FC<MagnetsProps> = ({ type }) => {
+export const Magnets: React.FC<MagnetsProps> = ({
+  type,
+  magnets = DEFAULT_MAGNETS,
+  initialPosition = magnets[0] || { x: width / 2, y: height / 2 },
+  magnetRadius = MAGNET_RADIUS,
+  magnetColor = MAGNET_COLOR,
+  objectRadius = CHEESE_RADIUS,
+  objectColor = CHEESE_COLOR,
+}) => {
   const { animatedStyle, panGesture, position } = useMagnetDrag(
-    FIRST_MAGNET_CENTER,
+    initialPosition,
+    magnets,
     {
       animation: type,
     },
   );
-  const radius = CHEESE_RADIUS;
 
   return (
     <View style={styles.container}>
@@ -170,28 +229,26 @@ export const Magnets: React.FC<MagnetsProps> = ({ type }) => {
           style={[
             styles.cheese,
             {
-              width: radius * 2,
-              height: radius * 2,
-              borderRadius: radius,
-              left: -radius,
-              top: -radius,
+              width: objectRadius * 2,
+              height: objectRadius * 2,
+              borderRadius: objectRadius,
+              backgroundColor: objectColor,
+              left: -objectRadius,
+              top: -objectRadius,
             },
             animatedStyle,
           ]}
         />
       </GestureDetector>
-      <Magnet
-        position={FIRST_MAGNET_CENTER}
-        radius={MAGNET_RADIUS}
-        color={MAGNET_COLOR}
-        objectPosition={position}
-      />
-      <Magnet
-        position={SECOND_MAGNET_CENTER}
-        radius={MAGNET_RADIUS}
-        color={MAGNET_COLOR}
-        objectPosition={position}
-      />
+      {magnets.map((magnetPosition, index) => (
+        <Magnet
+          key={`magnet-${index}`}
+          position={magnetPosition}
+          radius={magnetRadius}
+          color={magnetColor}
+          objectPosition={position}
+        />
+      ))}
     </View>
   );
 };
@@ -208,7 +265,6 @@ const styles = StyleSheet.create({
   },
   cheese: {
     position: 'absolute',
-    backgroundColor: CHEESE_COLOR,
     zIndex: 1000,
   },
 });
