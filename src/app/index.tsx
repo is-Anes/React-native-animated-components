@@ -11,6 +11,9 @@ export default function Page() {
         <TouchableOpacity onPress={() => router.push('/magnets-timing')}>
           <Text>Magnets Timing</Text>
         </TouchableOpacity>
+        <TouchableOpacity onPress={() => router.push('/robot-face')}>
+          <Text>Robot Face</Text>
+        </TouchableOpacity>
       </View>
     </View>
   );

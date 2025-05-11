@@ -8,6 +8,7 @@ export default function RootLayout() {
         <Stack.Screen name="index" />
         <Stack.Screen name="magnets-spring" />
         <Stack.Screen name="magnets-timing" />
+        <Stack.Screen name="robot-face" />
       </Stack>
     </GestureHandlerRootView>
   );
