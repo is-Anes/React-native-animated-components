@@ -4,6 +4,7 @@ import type { SharedValue } from 'react-native-reanimated';
 import Animated, {
   Extrapolation,
   interpolate,
+  interpolateColor,
   useAnimatedStyle,
   useDerivedValue,
   useSharedValue,
@@ -23,6 +24,7 @@ interface MagnetProps {
   radius: number;
   color: string;
   objectPosition: SharedValue<Position>;
+  type: 'spring' | 'timing';
 }
 
 // Constants
@@ -70,11 +72,19 @@ const DEFAULT_MAGNETS: Position[] = [
 ];
 
 const MAGNET_RADIUS = 10;
-const MAGNET_COLOR = '#b8b8b8';
+// const MAGNET_COLOR = '#c8c8c8'; // Darker metallic gray
+// const MAIN_MAGNET_COLOR = '#393939'; // Bronze metallic
+const MAGNET_COLOR = '#c1c1c1'; // Aluminum
+const MAGNET_ACTIVE_COLOR = {
+  spring: MAGNET_COLOR,
+  timing: MAGNET_COLOR,
+};
+const MAIN_MAGNET_COLOR = '#3b3b3b'; // Graphite steel
 const CHEESE_RADIUS = 25;
-const CHEESE_COLOR = 'red';
 const SPRING_CONFIG = {
   mass: 0.4,
+  damping: 15, // Added damping for more metallic "bounce" feel
+  stiffness: 120, // Added stiffness for metallic rigidity
 };
 
 const getDistance = (position: Position, position2: Position) => {
@@ -91,6 +101,7 @@ const useMagnetDrag = (
 ) => {
   const positionX = useSharedValue(initialPosition.x);
   const positionY = useSharedValue(initialPosition.y);
+  const isActive = useSharedValue(false);
   const context = useSharedValue<Position>({ x: 0, y: 0 });
   const withAnimation = animation === 'spring' ? withSpring : withTiming;
   const withConfig = animation === 'spring' ? SPRING_CONFIG : { duration: 500 };
@@ -125,11 +136,19 @@ const useMagnetDrag = (
     transform: [
       { translateX: positionX.value },
       { translateY: positionY.value },
+      {
+        scale: withSpring(isActive.value ? 1.2 : 1, {
+          mass: 0.5,
+          damping: 10,
+          stiffness: 100,
+        }),
+      },
     ],
   }));
 
   const panGesture = Gesture.Pan()
     .onBegin(() => {
+      isActive.value = true;
       context.value = {
         x: positionX.value,
         y: positionY.value,
@@ -152,6 +171,9 @@ const useMagnetDrag = (
         velocity: velocityY,
         ...withConfig,
       });
+    })
+    .onFinalize(() => {
+      isActive.value = false;
     });
 
   return {
@@ -166,12 +188,24 @@ const Magnet: React.FC<MagnetProps> = ({
   radius,
   color,
   objectPosition,
+  type,
 }) => {
   const rAnimatedStyle = useAnimatedStyle(() => {
     const distance = getDistance(objectPosition.value, position);
-    const scale = interpolate(distance, [0, 100], [3, 1], Extrapolation.CLAMP);
+    const scale = interpolate(
+      distance,
+      [0, CHEESE_RADIUS * 2],
+      [3, 1],
+      Extrapolation.CLAMP,
+    );
+    const bgColor = interpolateColor(
+      scale,
+      [1, 3],
+      [color, MAGNET_ACTIVE_COLOR[type]],
+    );
 
     return {
+      backgroundColor: bgColor,
       transform: [{ scale }],
     };
   }, [objectPosition, position]);
@@ -187,6 +221,11 @@ const Magnet: React.FC<MagnetProps> = ({
           borderRadius: radius,
           left: position.x - radius,
           top: position.y - radius,
+          shadowColor: '#000',
+          shadowOffset: { width: 0, height: 0 },
+          shadowOpacity: 0.1,
+          shadowRadius: 20,
+          elevation: 5,
         },
         rAnimatedStyle,
       ]}
@@ -211,7 +250,7 @@ export const Magnets: React.FC<MagnetsProps> = ({
   magnetRadius = MAGNET_RADIUS,
   magnetColor = MAGNET_COLOR,
   objectRadius = CHEESE_RADIUS,
-  objectColor = CHEESE_COLOR,
+  objectColor = MAIN_MAGNET_COLOR,
 }) => {
   const { animatedStyle, panGesture, position } = useMagnetDrag(
     initialPosition,
@@ -247,6 +286,7 @@ export const Magnets: React.FC<MagnetsProps> = ({
           radius={magnetRadius}
           color={magnetColor}
           objectPosition={position}
+          type={type}
         />
       ))}
     </View>
@@ -256,7 +296,7 @@ export const Magnets: React.FC<MagnetsProps> = ({
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: '#f5f5f5',
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -266,5 +306,11 @@ const styles = StyleSheet.create({
   cheese: {
     position: 'absolute',
     zIndex: 1000,
+    borderColor: '#888',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 10,
+    elevation: 10,
   },
 });
