@@ -1,7 +1,11 @@
 import { Dimensions, StyleSheet, View } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
+import type { SharedValue } from 'react-native-reanimated';
 import Animated, {
+  Extrapolation,
+  interpolate,
   useAnimatedStyle,
+  useDerivedValue,
   useSharedValue,
   withSpring,
   withTiming,
@@ -18,23 +22,21 @@ interface MagnetProps {
   position: Position;
   radius: number;
   color: string;
-}
-
-interface CheeseProps {
-  radius: number;
-  animation: 'spring' | 'timing';
+  objectPosition: SharedValue<Position>;
 }
 
 // Constants
 const { width, height } = Dimensions.get('window');
+
 const FIRST_MAGNET_CENTER: Position = {
-  x: width / 2,
+  x: width / 3,
   y: height / 2 - height / 4,
 };
 const SECOND_MAGNET_CENTER: Position = {
   x: width / 2,
   y: height / 2 + height / 4,
 };
+
 const MAGNET_RADIUS = 10;
 const MAGNET_COLOR = '#b8b8b8';
 const CHEESE_RADIUS = 25;
@@ -58,7 +60,11 @@ const useMagnetDrag = (
   const positionY = useSharedValue(initialPosition.y);
   const context = useSharedValue<Position>({ x: 0, y: 0 });
   const withAnimation = animation === 'spring' ? withSpring : withTiming;
-  const withConfig = animation === 'spring' ? SPRING_CONFIG : {};
+  const withConfig = animation === 'spring' ? SPRING_CONFIG : { duration: 500 };
+  const position = useDerivedValue(() => ({
+    x: positionX.value,
+    y: positionY.value,
+  }));
 
   const getNearestMagnet = (position: Position): Position => {
     'worklet';
@@ -106,46 +112,40 @@ const useMagnetDrag = (
   return {
     animatedStyle,
     panGesture,
+    position,
   };
 };
 
-const Magnet: React.FC<MagnetProps> = ({ position, radius, color }) => (
-  <View
-    style={[
-      styles.magnet,
-      {
-        width: radius * 2,
-        height: radius * 2,
-        backgroundColor: color,
-        borderRadius: radius,
-        left: position.x - radius,
-        top: position.y - radius,
-      },
-    ]}
-  />
-);
+const Magnet: React.FC<MagnetProps> = ({
+  position,
+  radius,
+  color,
+  objectPosition,
+}) => {
+  const rAnimatedStyle = useAnimatedStyle(() => {
+    const distance = getDistance(objectPosition.value, position);
+    const scale = interpolate(distance, [0, 100], [3, 1], Extrapolation.CLAMP);
 
-const Cheese: React.FC<CheeseProps> = ({ radius, animation }) => {
-  const { animatedStyle, panGesture } = useMagnetDrag(FIRST_MAGNET_CENTER, {
-    animation,
-  });
+    return {
+      transform: [{ scale }],
+    };
+  }, [objectPosition, position]);
 
   return (
-    <GestureDetector gesture={panGesture}>
-      <Animated.View
-        style={[
-          styles.cheese,
-          {
-            width: radius * 2,
-            height: radius * 2,
-            borderRadius: radius,
-            left: -radius,
-            top: -radius,
-          },
-          animatedStyle,
-        ]}
-      />
-    </GestureDetector>
+    <Animated.View
+      style={[
+        styles.magnet,
+        {
+          width: radius * 2,
+          height: radius * 2,
+          backgroundColor: color,
+          borderRadius: radius,
+          left: position.x - radius,
+          top: position.y - radius,
+        },
+        rAnimatedStyle,
+      ]}
+    />
   );
 };
 
@@ -154,19 +154,43 @@ type MagnetsProps = {
 };
 
 export const Magnets: React.FC<MagnetsProps> = ({ type }) => {
+  const { animatedStyle, panGesture, position } = useMagnetDrag(
+    FIRST_MAGNET_CENTER,
+    {
+      animation: type,
+    },
+  );
+  const radius = CHEESE_RADIUS;
+
   return (
     <View style={styles.container}>
       <StatusBar style="auto" />
-      <Cheese radius={CHEESE_RADIUS} animation={type} />
+      <GestureDetector gesture={panGesture}>
+        <Animated.View
+          style={[
+            styles.cheese,
+            {
+              width: radius * 2,
+              height: radius * 2,
+              borderRadius: radius,
+              left: -radius,
+              top: -radius,
+            },
+            animatedStyle,
+          ]}
+        />
+      </GestureDetector>
       <Magnet
         position={FIRST_MAGNET_CENTER}
         radius={MAGNET_RADIUS}
         color={MAGNET_COLOR}
+        objectPosition={position}
       />
       <Magnet
         position={SECOND_MAGNET_CENTER}
         radius={MAGNET_RADIUS}
         color={MAGNET_COLOR}
+        objectPosition={position}
       />
     </View>
   );
