@@ -9,6 +9,9 @@ export default function RootLayout() {
         <Stack.Screen name="magnets-spring" />
         <Stack.Screen name="magnets-timing" />
         <Stack.Screen name="robot-face" />
+        <Stack.Screen name="animated-gradient" />
+        <Stack.Screen name="animated-radial-gradient" />
+        <Stack.Screen name="atlas" />
       </Stack>
     </GestureHandlerRootView>
   );
