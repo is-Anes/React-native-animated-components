@@ -22,7 +22,7 @@ This repository contains all of the demos from my talk at App.js Conf 2025: [Eve
 
 ### Amazing resources
 
-While preparing for this talk, I dove deep into animation theory. Here are some resources that shaped my understanding:
+While preparing for this talk, I dove deep into animation theory. Here are some amazing resources:
 
 - [animations.dev](https://animations.dev) by Emil Kowalski - An incredible course on animations
 - [The Basics of Easing](https://web.dev/articles/the-basics-of-easing) by Paul Lewis
