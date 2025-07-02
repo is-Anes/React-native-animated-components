@@ -1,4 +1,4 @@
-# Everybody Can Cook with React Native
+# Everybody can Cook with React Native 🐭
 
 This repository contains all of the demos from my talk at App.js Conf 2025: [Everybody can Cook with React Native](https://youtu.be/kaUamUQXeo0).
 
@@ -38,6 +38,6 @@ During the talk, I presented [motion.reactiive.io](https://motion.reactiive.io),
 
 ## Thank you
 
-Follow me on [Twitter](https://x.com/reactiive_) / [Bsky](https://bsky.app/profile/reactiive.io).
+You can find me on [Twitter](https://x.com/reactiive_) / [Bsky](https://bsky.app/profile/reactiive.io).
 
 Check out my content at [reactiive.io](https://reactiive.io).
