@@ -4,6 +4,8 @@ This repository contains all of the demos from my talk at App.js Conf 2025: [Eve
 
 > Note: Some of these demos are extracted from [Demos](https://reactiive.io/demos), which is a collection of animations I've built over the past two years and I update weekly. Feel free to check it out if you're interested in more animations.
 
+https://github.com/user-attachments/assets/d9e882dd-20b9-4e46-9346-527cc379938a
+
 ## What's inside
 
 - Fluid Tab Interaction: inspired by [Nitish Khagwal](https://x.com/nitishkmrk/status/1834915715490758731)
