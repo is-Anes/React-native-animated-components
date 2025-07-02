@@ -59,7 +59,7 @@ export const useDemoStackedToast = () => {
         iconName: 'code',
       },
       {
-        title: 'You can find it at patreon.com/reactiive',
+        title: 'You can find it at reactiive.io/demos',
         iconName: 'package',
       },
       {
