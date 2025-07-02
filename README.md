@@ -20,7 +20,7 @@ This repository contains all of the demos from my talk at App.js Conf 2025: [Eve
 - Atlas Sphere: inspired by [Philip Davis](https://x.com/philipcdavis/status/1549409119131488256)
 - Grid Visualizer
 
-## Resources that helped me
+### Amazing resources
 
 While preparing for this talk, I dove deep into animation theory. Here are some resources that shaped my understanding:
 
@@ -29,6 +29,8 @@ While preparing for this talk, I dove deep into animation theory. Here are some 
 - [The physics behind spring animations](https://blog.maximeheckel.com/posts/the-physics-behind-spring-animations/) by Maxime Heckel
 - [Animate with Springs - WWDC 2023](https://youtu.be/HaZ2jw9rx9M) by Jacob Xiao
 - [React Native Skia tutorials](https://shopify.github.io/react-native-skia/docs/tutorials/)
+
+For more resources, you can find additional content [here](https://reactiive.io/articles/appjs-2025).
 
 ## Motion Tool
 
